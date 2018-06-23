@@ -1,7 +1,14 @@
 package com.challenge.analysis.controller;
 
-import org.springframework.stereotype.Controller;
+import com.challenge.analysis.dto.ResponseDTO;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 public class HTMLAnalysisController {
+
+    public ResponseDTO analyseHTML(@RequestParam String url) {
+
+        return null;
+    }
 }
