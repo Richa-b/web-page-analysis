@@ -2,6 +2,7 @@ package com.challenge.analysis.service;
 
 import com.challenge.analysis.dto.HTMLInfo;
 import com.challenge.analysis.dto.ResponseDTO;
+import com.challenge.analysis.util.FormValidationRule;
 import com.challenge.analysis.util.HTMLAnalysisConstants;
 import com.challenge.analysis.util.HTMLAnalysisUtil;
 import org.jsoup.Jsoup;
@@ -15,10 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class JsoupHTMLAnalysisService implements HTMLAnalysis<HTMLInfo> {
@@ -47,7 +45,7 @@ public class JsoupHTMLAnalysisService implements HTMLAnalysis<HTMLInfo> {
                 .setHtmlVersion(getHtmlVersion(document))
                 .setHeadingCountMap(getHeadingsCount(document))
                 .setLinkTypeMap(getLinksCount(document, currentUrl))
-                .setContainLoginForm(false)
+                .setContainLoginForm(isLoginFormExists(document))
                 .create();
     }
 
@@ -98,5 +96,11 @@ public class JsoupHTMLAnalysisService implements HTMLAnalysis<HTMLInfo> {
                 HTMLAnalysisConstants.INTERNAL_LINK :
                 HTMLAnalysisConstants.EXTERNAL_LINK;
         HTMLAnalysisUtil.maintainCountMap(linkTypeMap, key);
+    }
+
+    private Boolean isLoginFormExists(Document document) {
+        Map<String, List<Element>> contextMap = new HashMap<>();
+        return Arrays.stream(FormValidationRule.values())
+                .noneMatch(formValidationRule -> Boolean.FALSE.equals(formValidationRule.validate(contextMap, document)));
     }
 }
