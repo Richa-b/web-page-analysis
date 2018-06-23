@@ -1,10 +1,9 @@
 package com.challenge.analysis.service;
 
-import com.challenge.analysis.dto.HTMLInfo;
-import com.challenge.analysis.dto.ResponseDTO;
-import com.challenge.analysis.util.FormValidationRule;
-import com.challenge.analysis.util.HTMLAnalysisConstants;
-import com.challenge.analysis.util.HTMLAnalysisUtil;
+import com.challenge.analysis.model.HyperMediaLinkDetail;
+import com.challenge.analysis.model.ResponseDTO;
+import com.challenge.analysis.model.WebPageAnalysisInfo;
+import com.challenge.analysis.util.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.DocumentType;
@@ -17,17 +16,21 @@ import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.challenge.analysis.util.ConfigUtil.CONNECTION_TIME_OUT_IN_MILLIS;
+import static java.util.stream.Collectors.groupingBy;
 
 @Service
-public class JsoupHTMLAnalysisService implements HTMLAnalysis<HTMLInfo> {
+public class JsoupHTMLAnalysisService implements HTMLAnalysis<WebPageAnalysisInfo> {
 
     private final Logger log = LoggerFactory.getLogger(JsoupHTMLAnalysisService.class);
 
-    public ResponseDTO<HTMLInfo> analyseHTML(String currentUrl) {
+    public ResponseDTO<WebPageAnalysisInfo> analyseHTML(String currentUrl) {
         log.info("-> analyseHTML :: Url=" + currentUrl);
-        ResponseDTO<HTMLInfo> responseDTO = new ResponseDTO<>();
+        ResponseDTO<WebPageAnalysisInfo> responseDTO = new ResponseDTO<>();
         try {
-            Document document = Jsoup.connect(currentUrl).get();
+            Document document = Jsoup.connect(currentUrl).timeout(ConfigUtil.CONNECTION_TIME_OUT_IN_MILLIS).get();
             responseDTO.setData(getHTMLInfo(document, currentUrl));
         } catch (IOException e) {
             log.error("Exception occurred while accessing Url");
@@ -37,14 +40,14 @@ public class JsoupHTMLAnalysisService implements HTMLAnalysis<HTMLInfo> {
         return responseDTO;
     }
 
-    private HTMLInfo getHTMLInfo(Document document, String currentUrl) {
-        return HTMLInfo.builder()
+    private WebPageAnalysisInfo getHTMLInfo(Document document, String currentUrl) {
+        return WebPageAnalysisInfo.builder()
                 .setUrl(currentUrl)
                 .setTitle(document.title())
                 .setHtmlContent(document.html())
                 .setHtmlVersion(getHtmlVersion(document))
                 .setHeadingCountMap(getHeadingsCount(document))
-                .setLinkTypeMap(getLinksCount(document, currentUrl))
+                .setLinkTypeMap(fetchHyperMediaLinkDetail(document, currentUrl))
                 .setContainLoginForm(isLoginFormExists(document))
                 .create();
     }
@@ -81,21 +84,46 @@ public class JsoupHTMLAnalysisService implements HTMLAnalysis<HTMLInfo> {
         return headingCountMap;
     }
 
-    private Map<String, Integer> getLinksCount(Document document, String currentUrl) {
-        Map<String, Integer> linkTypeMap = new HashMap<>();
+    private Map<HyperMediaLinkGroup, Set<HyperMediaLinkDetail>> fetchHyperMediaLinkDetail(Document document, String currentUrl) {
         String currentDomain = HTMLAnalysisUtil.getDomainName(currentUrl);
-        List<Element> anchorElements = document.select(HTMLAnalysisConstants.ANCHOR_TAG);
-        anchorElements.forEach(link ->
-                populateLinkCountMap(link.absUrl(HTMLAnalysisConstants.HREF_ATTRIBUTE), currentDomain, linkTypeMap)
-        );
-        return linkTypeMap;
+
+        Set<HyperMediaLinkDetail> hyperMediaLinkDetails = new HashSet<>();
+        Arrays.stream(LinkType.values()).forEach(linkType ->
+                hyperMediaLinkDetails.addAll(createHyperMediaLinks
+                        (linkType, document.select(linkType.getTag()))));
+
+        return populateAccessibilityInfoForHyperMediaLinks(hyperMediaLinkDetails, currentDomain);
     }
 
-    private void populateLinkCountMap(String absUrl, String currentDomain, Map<String, Integer> linkTypeMap) {
-        String key = HTMLAnalysisUtil.isInternalDomain(currentDomain, absUrl) ?
-                HTMLAnalysisConstants.INTERNAL_LINK :
-                HTMLAnalysisConstants.EXTERNAL_LINK;
-        HTMLAnalysisUtil.maintainCountMap(linkTypeMap, key);
+    private Map<HyperMediaLinkGroup, Set<HyperMediaLinkDetail>> populateAccessibilityInfoForHyperMediaLinks(Set<HyperMediaLinkDetail> hyperMediaLinkDetails, String currentDomain) {
+
+        hyperMediaLinkDetails.forEach(hyperMediaLinkDetail -> {
+            try {
+                log.info("Accessing " + hyperMediaLinkDetail.getUrl());
+                Jsoup.connect(hyperMediaLinkDetail.getUrl())
+                        .timeout(CONNECTION_TIME_OUT_IN_MILLIS)
+                        .ignoreContentType(true)
+                        .execute();
+                hyperMediaLinkDetail.setReachable(true);
+                hyperMediaLinkDetail.setComments("Link Is Reachable");
+            } catch (IOException e) {
+                log.error("Error occurred while accessing link " + hyperMediaLinkDetail.getUrl(), e);
+                hyperMediaLinkDetail.setReachable(false);
+                hyperMediaLinkDetail.setComments(e.getMessage());
+            }
+        });
+
+        return hyperMediaLinkDetails.stream()
+                .collect(groupingBy(hyperMediaLinkDetail ->
+                        HyperMediaLinkGroup.getLinkGroup(hyperMediaLinkDetail, currentDomain), Collectors.toSet()));
+    }
+
+    private Set<HyperMediaLinkDetail> createHyperMediaLinks(LinkType linkType, List<Element> elements) {
+        return elements.stream()
+                .filter(element -> !StringUtils.isEmpty(element.absUrl(linkType.getAttribute())))
+                .map(element -> new
+                        HyperMediaLinkDetail(element.absUrl(linkType.getAttribute()), linkType))
+                .collect(Collectors.toSet());
     }
 
     private Boolean isLoginFormExists(Document document) {

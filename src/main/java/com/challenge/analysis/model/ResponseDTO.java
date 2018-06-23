@@ -1,4 +1,4 @@
-package com.challenge.analysis.dto;
+package com.challenge.analysis.model;
 
 import org.springframework.util.StringUtils;
 

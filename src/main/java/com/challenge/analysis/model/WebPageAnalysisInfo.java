@@ -1,11 +1,13 @@
-package com.challenge.analysis.dto;
+package com.challenge.analysis.model;
 
+import com.challenge.analysis.util.HyperMediaLinkGroup;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 
 import java.util.Map;
+import java.util.Set;
 
-public class HTMLInfo {
+public class WebPageAnalysisInfo {
 
     private String url;
 
@@ -17,11 +19,19 @@ public class HTMLInfo {
 
     private Map<String, Integer> headingCountMap;
 
-    private Map<String, Integer> linkTypeMap;
+    public Map<HyperMediaLinkGroup, Set<HyperMediaLinkDetail>> getLinkTypeMap() {
+        return linkTypeMap;
+    }
+
+    public void setLinkTypeMap(Map<HyperMediaLinkGroup, Set<HyperMediaLinkDetail>> linkTypeMap) {
+        this.linkTypeMap = linkTypeMap;
+    }
+
+    private Map<HyperMediaLinkGroup, Set<HyperMediaLinkDetail>> linkTypeMap;
 
     private Boolean containLoginForm;
 
-    private HTMLInfo() {
+    private WebPageAnalysisInfo() {
     }
 
     public String getUrl() {
@@ -64,13 +74,6 @@ public class HTMLInfo {
         this.headingCountMap = headingCountMap;
     }
 
-    public Map<String, Integer> getLinkTypeMap() {
-        return linkTypeMap;
-    }
-
-    public void setLinkTypeMap(Map<String, Integer> linkTypeMap) {
-        this.linkTypeMap = linkTypeMap;
-    }
 
     public Boolean getContainLoginForm() {
         return containLoginForm;
@@ -80,7 +83,7 @@ public class HTMLInfo {
         this.containLoginForm = containLoginForm;
     }
 
-    private HTMLInfo(String url, String htmlContent, String htmlVersion, String title, Map<String, Integer> headingCountMap, Map<String, Integer> linkTypeMap, Boolean containLoginForm) {
+    private WebPageAnalysisInfo(String url, String htmlContent, String htmlVersion, String title, Map<String, Integer> headingCountMap, Map<HyperMediaLinkGroup, Set<HyperMediaLinkDetail>> linkTypeMap, Boolean containLoginForm) {
         this.url = url;
         this.htmlContent = htmlContent;
         this.htmlVersion = htmlVersion;
@@ -129,7 +132,7 @@ public class HTMLInfo {
             return this;
         }
 
-        public HTMLInfoBuilder setLinkTypeMap(Map<String, Integer> linkTypeMap) {
+        public HTMLInfoBuilder setLinkTypeMap(Map<HyperMediaLinkGroup, Set<HyperMediaLinkDetail>> linkTypeMap) {
             this.linkTypeMap = linkTypeMap;
             return this;
         }
@@ -141,13 +144,13 @@ public class HTMLInfo {
 
         private Map<String, Integer> headingCountMap;
 
-        private Map<String, Integer> linkTypeMap;
+        private Map<HyperMediaLinkGroup, Set<HyperMediaLinkDetail>> linkTypeMap;
 
         private Boolean containLoginForm;
 
 
-        public HTMLInfo create() {
-            return new HTMLInfo(url, htmlContent, htmlVersion, title, headingCountMap, linkTypeMap, containLoginForm);
+        public WebPageAnalysisInfo create() {
+            return new WebPageAnalysisInfo(url, htmlContent, htmlVersion, title, headingCountMap, linkTypeMap, containLoginForm);
         }
 
 
