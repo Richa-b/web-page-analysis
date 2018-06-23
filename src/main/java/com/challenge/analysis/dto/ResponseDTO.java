@@ -22,7 +22,7 @@ public class ResponseDTO<T> {
 
     }
 
-    void setErrorResponse(Throwable e, String message) {
+    public void setErrorResponse(Throwable e, String message) {
         this.message = StringUtils.isEmpty(message) ? e.getMessage() : message;
         this.status = false;
     }

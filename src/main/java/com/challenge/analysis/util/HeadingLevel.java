@@ -9,9 +9,13 @@ public enum HeadingLevel {
     H5("h5"),
     H6("h6");
 
-    String tagName;
+    private String tagName;
 
-    private HeadingLevel(String tagName) {
+    public String getTagName() {
+        return tagName;
+    }
+
+    HeadingLevel(String tagName) {
         this.tagName = tagName;
     }
 }
