@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 import java.util.Objects;
 
 public class HTMLAnalysisUtil {
@@ -29,6 +30,15 @@ public class HTMLAnalysisUtil {
     public static Boolean isInternalDomain(String currentDomain, String url) {
         String domainToBeVerified = getDomainName(url);
         return currentDomain.equals(domainToBeVerified);
+    }
+
+    public static void maintainCountMap(Map<String, Integer> countMap, String key) {
+        if (countMap.containsKey(key)) {
+            Integer count = countMap.get(key);
+            countMap.put(key, count + 1);
+        } else {
+            countMap.put(key, 1);
+        }
     }
 
 }

@@ -4,8 +4,6 @@ import com.challenge.analysis.dto.HTMLInfo;
 import com.challenge.analysis.dto.ResponseDTO;
 import com.challenge.analysis.util.HTMLAnalysisConstants;
 import com.challenge.analysis.util.HTMLAnalysisUtil;
-import com.challenge.analysis.util.HeadingLevel;
-import com.challenge.analysis.util.HyperMediaLinkType;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.DocumentType;
@@ -14,38 +12,43 @@ import org.jsoup.nodes.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class JsoupHTMLAnalysisService implements HTMLAnalysis<HTMLInfo> {
 
     private final Logger log = LoggerFactory.getLogger(JsoupHTMLAnalysisService.class);
 
-    public ResponseDTO<HTMLInfo> analyseHTML(String url) {
+    public ResponseDTO<HTMLInfo> analyseHTML(String currentUrl) {
+        log.info("-> analyseHTML :: Url=" + currentUrl);
         ResponseDTO<HTMLInfo> responseDTO = new ResponseDTO<>();
         try {
-            Document document = Jsoup.connect(url).get();
-            responseDTO.setData(getHTMLInfo(document, url));
+            Document document = Jsoup.connect(currentUrl).get();
+            responseDTO.setData(getHTMLInfo(document, currentUrl));
         } catch (IOException e) {
-            log.error("Exception occurred while crawling Url");
-            responseDTO.setErrorResponse(e, "Error Occurred while crawling URL " + url);
+            log.error("Exception occurred while accessing Url");
+            responseDTO.setErrorResponse(e, "Error Occurred while accessing URL " + currentUrl + " " + e.getMessage());
         }
+        log.info("<- analyseHTML:: ResponseDTO=> status=" + responseDTO.getStatus());
         return responseDTO;
     }
 
-    private HTMLInfo getHTMLInfo(Document document, String url) {
-        HTMLInfo htmlInfo = HTMLInfo.builder()
-                .setUrl(url)
+    private HTMLInfo getHTMLInfo(Document document, String currentUrl) {
+        return HTMLInfo.builder()
+                .setUrl(currentUrl)
                 .setTitle(document.title())
                 .setHtmlContent(document.html())
                 .setHtmlVersion(getHtmlVersion(document))
                 .setHeadingCountMap(getHeadingsCount(document))
-                .setLinkTypeMap(null)
+                .setLinkTypeMap(getLinksCount(document, currentUrl))
                 .setContainLoginForm(false)
                 .create();
-        return htmlInfo;
     }
 
     private String getHtmlVersion(Document document) {
@@ -57,41 +60,43 @@ public class JsoupHTMLAnalysisService implements HTMLAnalysis<HTMLInfo> {
     }
 
     private String generateHtmlVersion(Node node) {
-        String htmlVersion = "UNIDENTIFIED";
+        String htmlVersion = HTMLAnalysisConstants.UNIDENTIFIED;
         if (Objects.nonNull(node)) {
             DocumentType documentType = (DocumentType) node;
-            String publicId = documentType.attr("publicid");
-            if (Objects.isNull(publicId)) {
-                return "HTML 5.0";
-            } else if (publicId.contains("XHTML")) {
-                return publicId.substring(publicId.indexOf("XHTML"));
-            } else if (publicId.contains("HTML")) {
-                return publicId.substring(publicId.indexOf("HTML"));
+            String publicId = documentType.attr(HTMLAnalysisConstants.PUBLIC_ID);
+            if (StringUtils.isEmpty(publicId)) {
+                return HTMLAnalysisConstants.HTML_5;
+            } else if (publicId.contains(HTMLAnalysisConstants.XHTML)) {
+                return publicId.substring(publicId.indexOf(HTMLAnalysisConstants.XHTML));
+            } else if (publicId.contains(HTMLAnalysisConstants.HTML)) {
+                return publicId.substring(publicId.indexOf(HTMLAnalysisConstants.HTML));
             }
         }
         return htmlVersion;
     }
 
-    private Map<HeadingLevel, Integer> getHeadingsCount(Document document) {
-        Map<HeadingLevel, Integer> headingCountMap = new HashMap<>();
-        Arrays.stream(HeadingLevel.values()).forEach(headingLevel -> {
-                    headingCountMap.put(headingLevel, document.select(headingLevel.getTagName()).size());
-                }
+    private Map<String, Integer> getHeadingsCount(Document document) {
+        Map<String, Integer> headingCountMap = new HashMap<>();
+        HTMLAnalysisConstants.headingLevels.forEach(headingLevel ->
+                headingCountMap.put(headingLevel, document.select(headingLevel).size())
         );
         return headingCountMap;
     }
 
-    private Map<HyperMediaLinkType, Integer> getLinksCount(Document document, String url) {
-        Map<HyperMediaLinkType, Integer> linkTypeMap = new HashMap<>();
+    private Map<String, Integer> getLinksCount(Document document, String currentUrl) {
+        Map<String, Integer> linkTypeMap = new HashMap<>();
+        String currentDomain = HTMLAnalysisUtil.getDomainName(currentUrl);
         List<Element> anchorElements = document.select(HTMLAnalysisConstants.ANCHOR_TAG);
-        anchorElements.forEach(link -> {
-            String absUrl = link.absUrl(HTMLAnalysisConstants.HREF_ATTRIBUTE);
-            if (HTMLAnalysisUtil.isInternalDomain(url, absUrl)) {
-                linkTypeMap.put(HyperMediaLinkType.INTERNAL, 1);
-            } else {
-                linkTypeMap.put(HyperMediaLinkType.EXTERNAL, 1);
-            }
-        });
-        return null;
+        anchorElements.forEach(link ->
+                populateLinkCountMap(link.absUrl(HTMLAnalysisConstants.HREF_ATTRIBUTE), currentDomain, linkTypeMap)
+        );
+        return linkTypeMap;
+    }
+
+    private void populateLinkCountMap(String absUrl, String currentDomain, Map<String, Integer> linkTypeMap) {
+        String key = HTMLAnalysisUtil.isInternalDomain(currentDomain, absUrl) ?
+                HTMLAnalysisConstants.INTERNAL_LINK :
+                HTMLAnalysisConstants.EXTERNAL_LINK;
+        HTMLAnalysisUtil.maintainCountMap(linkTypeMap, key);
     }
 }

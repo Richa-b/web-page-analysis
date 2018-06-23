@@ -1,7 +1,5 @@
 package com.challenge.analysis.dto;
 
-import com.challenge.analysis.util.HeadingLevel;
-import com.challenge.analysis.util.HyperMediaLinkType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 
@@ -17,9 +15,9 @@ public class HTMLInfo {
     private String htmlVersion;
     private String title;
 
-    private Map<HeadingLevel, Integer> headingCountMap;
+    private Map<String, Integer> headingCountMap;
 
-    private Map<HyperMediaLinkType, Integer> linkTypeMap;
+    private Map<String, Integer> linkTypeMap;
 
     private Boolean containLoginForm;
 
@@ -58,19 +56,19 @@ public class HTMLInfo {
         this.title = title;
     }
 
-    public Map<HeadingLevel, Integer> getHeadingCountMap() {
+    public Map<String, Integer> getHeadingCountMap() {
         return headingCountMap;
     }
 
-    public void setHeadingCountMap(Map<HeadingLevel, Integer> headingCountMap) {
+    public void setHeadingCountMap(Map<String, Integer> headingCountMap) {
         this.headingCountMap = headingCountMap;
     }
 
-    public Map<HyperMediaLinkType, Integer> getLinkTypeMap() {
+    public Map<String, Integer> getLinkTypeMap() {
         return linkTypeMap;
     }
 
-    public void setLinkTypeMap(Map<HyperMediaLinkType, Integer> linkTypeMap) {
+    public void setLinkTypeMap(Map<String, Integer> linkTypeMap) {
         this.linkTypeMap = linkTypeMap;
     }
 
@@ -82,7 +80,7 @@ public class HTMLInfo {
         this.containLoginForm = containLoginForm;
     }
 
-    private HTMLInfo(String url, String htmlContent, String htmlVersion, String title, Map<HeadingLevel, Integer> headingCountMap, Map<HyperMediaLinkType, Integer> linkTypeMap, Boolean containLoginForm) {
+    private HTMLInfo(String url, String htmlContent, String htmlVersion, String title, Map<String, Integer> headingCountMap, Map<String, Integer> linkTypeMap, Boolean containLoginForm) {
         this.url = url;
         this.htmlContent = htmlContent;
         this.htmlVersion = htmlVersion;
@@ -126,12 +124,12 @@ public class HTMLInfo {
             return this;
         }
 
-        public HTMLInfoBuilder setHeadingCountMap(Map<HeadingLevel, Integer> headingCountMap) {
+        public HTMLInfoBuilder setHeadingCountMap(Map<String, Integer> headingCountMap) {
             this.headingCountMap = headingCountMap;
             return this;
         }
 
-        public HTMLInfoBuilder setLinkTypeMap(Map<HyperMediaLinkType, Integer> linkTypeMap) {
+        public HTMLInfoBuilder setLinkTypeMap(Map<String, Integer> linkTypeMap) {
             this.linkTypeMap = linkTypeMap;
             return this;
         }
@@ -141,9 +139,9 @@ public class HTMLInfo {
             return this;
         }
 
-        private Map<HeadingLevel, Integer> headingCountMap;
+        private Map<String, Integer> headingCountMap;
 
-        private Map<HyperMediaLinkType, Integer> linkTypeMap;
+        private Map<String, Integer> linkTypeMap;
 
         private Boolean containLoginForm;
 
