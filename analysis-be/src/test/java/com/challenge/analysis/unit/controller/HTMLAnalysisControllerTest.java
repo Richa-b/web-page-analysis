@@ -21,7 +21,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @RunWith(SpringRunner.class)
@@ -57,4 +59,28 @@ public class HTMLAnalysisControllerTest {
         assertNotNull(responseDTO1);
         assertEquals(true, responseDTO1.getStatus());
     }
+
+
+    @Test
+    public void analyseHTMLBadRequest() throws Exception {
+        ResponseDTO<WebPageAnalysisInfo> responseDTO = new ResponseDTO<>();
+        responseDTO.setData(TestUtils.getWebPageAnalysisInfo());
+        Mockito.when(htmlAnalysis.analyseHTML(Mockito.anyString())).thenReturn(responseDTO);
+
+        MvcResult result = mockMvc
+                .perform(MockMvcRequestBuilders.get("/api/v1/analyse")
+                        .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andReturn();
+
+        int status = result.getResponse().getStatus();
+        assertEquals(HttpStatus.BAD_REQUEST.value(), status);
+
+        // verify that service method was not called
+        verify(htmlAnalysis, times(0)).analyseHTML(any(String.class));
+        ResponseDTO<WebPageAnalysisInfo> responseDTO1 = TestUtils.jsonToObject(result.getResponse()
+                .getContentAsString(), ResponseDTO.class);
+        assertNull(responseDTO1.getData());
+        assertEquals(false, responseDTO1.getStatus());
+    }
+
 }

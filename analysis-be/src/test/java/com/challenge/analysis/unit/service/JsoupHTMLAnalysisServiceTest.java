@@ -47,6 +47,12 @@ public class JsoupHTMLAnalysisServiceTest {
     }
 
     @Test
+    public void malformedUrlTest() {
+        ResponseDTO responseDTO = jsoupHTMLAnalysisService.analyseHTML("wwww.invalid.com");
+        Assert.assertFalse(responseDTO.getStatus());
+    }
+
+    @Test
     public void isLoginFormExistPositive() {
         Document document = Jsoup.parse("<div><form action='/login' method='post'> <input type='text' name='user'> " +
                 "<input type='password' name='password'></form> </div>");
