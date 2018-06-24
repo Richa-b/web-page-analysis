@@ -42,8 +42,11 @@ public class JsoupHTMLAnalysisService implements HTMLAnalysis<WebPageAnalysisInf
             Document document = Jsoup.connect(currentUrl).timeout(ConfigUtil.CONNECTION_TIME_OUT_IN_MILLIS).get();
             responseDTO.setData(getHTMLInfo(document, currentUrl));
         } catch (IOException e) {
-            log.error("Exception occurred while accessing Url");
-            responseDTO.setErrorResponse(e, "Error Occurred while accessing URL " + currentUrl + "::" + e.getMessage());
+            log.error("Exception occurred while accessing Url", e);
+            responseDTO.setErrorResponse(e, "Error Occurred while accessing URL-" + currentUrl + "::" + e.getMessage());
+        } catch (Exception e) {
+            log.error("Exception occurred while scraping Url", e);
+            responseDTO.setErrorResponse(e, "Error Occurred while scraping URL-" + currentUrl + "::" + e.getMessage());
         }
         log.info("<- analyseHTML:: ResponseDTO=> status=" + responseDTO.getStatus());
         return responseDTO;
