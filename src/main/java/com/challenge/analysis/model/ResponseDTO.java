@@ -15,6 +15,10 @@ public class ResponseDTO<T> {
         this.message = message;
     }
 
+    public ResponseDTO(String message) {
+        this.message = message;
+    }
+
     public ResponseDTO(Boolean status, String message, T data) {
         this.status = status;
         this.message = message;

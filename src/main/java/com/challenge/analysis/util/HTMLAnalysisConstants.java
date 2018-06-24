@@ -29,7 +29,6 @@ public class HTMLAnalysisConstants {
     public static String EMAIL = "email";
     public static String PASSWORD = "password";
 
-    public static String PROPERTIES_FILE_LIST_DELIMITER = ",";
     public static Pattern FORM_ACTION_PATTERN = Pattern.compile(ConfigUtil.FORM_ACTION_REGEX);
 
     public static List<String> headingLevels = Arrays.asList("h1", "h2", "h3", "h4", "h5", "h6");

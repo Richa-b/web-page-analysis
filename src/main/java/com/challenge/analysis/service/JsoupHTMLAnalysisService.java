@@ -11,24 +11,35 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import static com.challenge.analysis.util.ConfigUtil.CONNECTION_TIME_OUT_IN_MILLIS;
 import static java.util.stream.Collectors.groupingBy;
 
 @Service
 public class JsoupHTMLAnalysisService implements HTMLAnalysis<WebPageAnalysisInfo> {
 
+    @Autowired
+    WebPageAccessibilityCheckerService webPageAccessibilityCheckerService;
+
+    @Autowired
+    MessageSource messageSource;
+
     private final Logger log = LoggerFactory.getLogger(JsoupHTMLAnalysisService.class);
 
     public ResponseDTO<WebPageAnalysisInfo> analyseHTML(String currentUrl) {
         log.info("-> analyseHTML :: Url=" + currentUrl);
-        ResponseDTO<WebPageAnalysisInfo> responseDTO = new ResponseDTO<>();
+
+        ResponseDTO<WebPageAnalysisInfo> responseDTO = new ResponseDTO<>(messageSource.getMessage("default.successful.message",
+                null, LocaleContextHolder.getLocale()));
         try {
             Document document = Jsoup.connect(currentUrl).timeout(ConfigUtil.CONNECTION_TIME_OUT_IN_MILLIS).get();
             responseDTO.setData(getHTMLInfo(document, currentUrl));
@@ -86,32 +97,25 @@ public class JsoupHTMLAnalysisService implements HTMLAnalysis<WebPageAnalysisInf
 
     private Map<HyperMediaLinkGroup, Set<HyperMediaLinkDetail>> fetchHyperMediaLinkDetail(Document document, String currentUrl) {
         String currentDomain = HTMLAnalysisUtil.getDomainName(currentUrl);
-
         Set<HyperMediaLinkDetail> hyperMediaLinkDetails = new HashSet<>();
         Arrays.stream(LinkType.values()).forEach(linkType ->
                 hyperMediaLinkDetails.addAll(createHyperMediaLinks
                         (linkType, document.select(linkType.getTag()))));
 
+        log.info("Found " + hyperMediaLinkDetails.size() + " hyper media links");
         return populateAccessibilityInfoForHyperMediaLinks(hyperMediaLinkDetails, currentDomain);
     }
 
     private Map<HyperMediaLinkGroup, Set<HyperMediaLinkDetail>> populateAccessibilityInfoForHyperMediaLinks(Set<HyperMediaLinkDetail> hyperMediaLinkDetails, String currentDomain) {
 
-        hyperMediaLinkDetails.forEach(hyperMediaLinkDetail -> {
-            try {
-                log.info("Accessing " + hyperMediaLinkDetail.getUrl());
-                Jsoup.connect(hyperMediaLinkDetail.getUrl())
-                        .timeout(CONNECTION_TIME_OUT_IN_MILLIS)
-                        .ignoreContentType(true)
-                        .execute();
-                hyperMediaLinkDetail.setReachable(true);
-                hyperMediaLinkDetail.setComments("Link Is Reachable");
-            } catch (IOException e) {
-                log.error("Error occurred while accessing link " + hyperMediaLinkDetail.getUrl(), e);
-                hyperMediaLinkDetail.setReachable(false);
-                hyperMediaLinkDetail.setComments(e.getMessage());
-            }
-        });
+        CompletableFuture[] completableFutures = new CompletableFuture[hyperMediaLinkDetails.size()];
+        int counter = 0;
+        for (HyperMediaLinkDetail hyperMediaLinkDetail : hyperMediaLinkDetails) {
+            log.info("Accessing url-" + counter + "::" + hyperMediaLinkDetail.getUrl());
+            completableFutures[counter] = webPageAccessibilityCheckerService.accessWebPageLinks(hyperMediaLinkDetail);
+            counter++;
+        }
+        CompletableFuture.allOf(completableFutures).join();
 
         return hyperMediaLinkDetails.stream()
                 .collect(groupingBy(hyperMediaLinkDetail ->

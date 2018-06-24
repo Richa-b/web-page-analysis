@@ -12,12 +12,12 @@ public class HTMLAnalysisUtil {
 
     private static final Logger log = LoggerFactory.getLogger(HTMLAnalysisUtil.class);
 
-    public static String getDomainName(String url) {
+    public static String getDomainName(String absoluteUrl) {
         URI uri;
         try {
-            uri = new URI(url);
+            uri = new URI(absoluteUrl);
         } catch (URISyntaxException e) {
-            log.error("Error Occurred while parsing url " + url, e);
+            log.error("Error Occurred while parsing url " + absoluteUrl, e);
             return null;
         }
         String hostName = uri.getHost();
@@ -27,9 +27,10 @@ public class HTMLAnalysisUtil {
         return hostName;
     }
 
-    public static Boolean isInternalDomain(String currentDomain, String url) {
-        String domainToBeVerified = getDomainName(url);
-        return currentDomain.equals(domainToBeVerified);
+    public static Boolean isInternalDomain(String currentDomain, String absoluteUrl) {
+        String domainToBeVerified = getDomainName(absoluteUrl);
+        return  currentDomain.equals(domainToBeVerified) || (Objects.nonNull(domainToBeVerified) &&
+                domainToBeVerified.endsWith(currentDomain));
     }
 
     public static void maintainCountMap(Map<String, Integer> countMap, String key) {
