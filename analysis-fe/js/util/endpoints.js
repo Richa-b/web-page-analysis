@@ -1,1 +1,1 @@
-const ANALYSE_WEB_PAGE_URL = "/analysis";
+const ANALYSE_WEB_PAGE_URL = "api/v1/analyse";
