@@ -1,5 +1,5 @@
 .content-wrapper {
-    margin-top: 50px;
+    margin-top: 20px;
     overflow: auto;
 }
 
@@ -20,7 +20,7 @@
 
 .app-header {
     background-color: #222;
-    height: 150px;
+    height: 100px;
     padding: 20px;
     color: white;
 }
@@ -29,11 +29,21 @@
     font-size: 1.5em;
 }
 
-.app-intro {
-    font-size: large;
+.spinner {
+    padding: 0.5em;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1200;
 }
 
-@keyframes app-logo-spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+.spinner img {
+    height: 100px;
+    width: 100px;
+}
+
+
+.blockMsg {
+    border: 0 !important;
 }

@@ -1,5 +1,3 @@
-const BASEPATH = "/state-ranking-system/";
-
 (function () {
 
     <!-- ADD COMMON CSS FILES HERE -->
@@ -8,12 +6,13 @@ const BASEPATH = "/state-ranking-system/";
 
 
     <!-- ADD COMMON JAVASCRIPT FILES HERE -->
-    addScriptTag("../js/bootstrap.min.js");
+    addScriptTag("../js/thirdParty/bootstrap.js");
     addScriptTag("../js/util/constants.js");
     addScriptTag("../config/env.js");
     addScriptTag("../js/util/endpoints.js");
     addScriptTag("../js/util/application.js");
-    addScriptTag("../js/handlebars.min.js");
+    addScriptTag("../js/thirdParty/handlebars.min.js");
+    addScriptTag("../js/thirdParty/blockUI.js");
     addScriptTag("../js/util/handleBarHelper.js");
 })();
 

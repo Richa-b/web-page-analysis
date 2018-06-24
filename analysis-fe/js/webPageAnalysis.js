@@ -26,6 +26,7 @@ function getAnalysisInfo(element) {
             const linkDetailTemplate = Handlebars.compile(linkDetailSource);
             const html = linkDetailTemplate(response.data);
             $('#link-detail').html(html);
+            $('#linkDetailTable').DataTable();
         } else {
             $("#web-page-detail").html(response.message);
         }
