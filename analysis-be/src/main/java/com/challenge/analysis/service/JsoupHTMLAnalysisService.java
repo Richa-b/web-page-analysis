@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -38,20 +37,19 @@ public class JsoupHTMLAnalysisService implements HTMLAnalysis<WebPageAnalysisInf
     public ResponseDTO<WebPageAnalysisInfo> analyseHTML(String currentUrl) {
         log.info("-> analyseHTML :: Url=" + currentUrl);
 
-        ResponseDTO<WebPageAnalysisInfo> responseDTO = new ResponseDTO<>(messageSource.getMessage("default.successful.message",
-                null, "Web Page Analysed successfully.", LocaleContextHolder.getLocale()));
+        ResponseDTO<WebPageAnalysisInfo> responseDTO = new ResponseDTO<>("Web Page Analysed successfully.");
         try {
             Document document = Jsoup.connect(currentUrl).timeout(ConfigUtil.CONNECTION_TIME_OUT_IN_MILLIS).get();
             responseDTO.setData(getHTMLInfo(document, currentUrl));
         } catch (IOException e) {
             log.error("Exception occurred while accessing Url");
-            responseDTO.setErrorResponse(e, "Error Occurred while accessing URL " + currentUrl + " " + e.getMessage());
+            responseDTO.setErrorResponse(e, "Error Occurred while accessing URL " + currentUrl + "::" + e.getMessage());
         }
         log.info("<- analyseHTML:: ResponseDTO=> status=" + responseDTO.getStatus());
         return responseDTO;
     }
 
-    private WebPageAnalysisInfo getHTMLInfo(Document document, String currentUrl) {
+    public WebPageAnalysisInfo getHTMLInfo(Document document, String currentUrl) {
         return WebPageAnalysisInfo.builder()
                 .setUrl(currentUrl)
                 .setTitle(document.title())
@@ -63,7 +61,7 @@ public class JsoupHTMLAnalysisService implements HTMLAnalysis<WebPageAnalysisInf
                 .create();
     }
 
-    private String getHtmlVersion(Document document) {
+    public String getHtmlVersion(Document document) {
         List<Node> nodes = document.childNodes();
         Node node = nodes.stream()
                 .filter(documentNode -> documentNode instanceof DocumentType)
@@ -87,7 +85,7 @@ public class JsoupHTMLAnalysisService implements HTMLAnalysis<WebPageAnalysisInf
         return htmlVersion;
     }
 
-    private Map<String, Integer> getHeadingsCount(Document document) {
+    public Map<String, Integer> getHeadingsCount(Document document) {
         Map<String, Integer> headingCountMap = new HashMap<>();
         HTMLAnalysisConstants.headingLevels.forEach(headingLevel ->
                 headingCountMap.put(headingLevel, document.select(headingLevel).size())
@@ -95,7 +93,7 @@ public class JsoupHTMLAnalysisService implements HTMLAnalysis<WebPageAnalysisInf
         return headingCountMap;
     }
 
-    private Map<HyperMediaLinkGroup, Set<HyperMediaLinkDetail>> fetchHyperMediaLinkDetail(Document document, String currentUrl) {
+    public Map<HyperMediaLinkGroup, Set<HyperMediaLinkDetail>> fetchHyperMediaLinkDetail(Document document, String currentUrl) {
         String currentDomain = HTMLAnalysisUtil.getDomainName(currentUrl);
         Set<HyperMediaLinkDetail> hyperMediaLinkDetails = new HashSet<>();
         Arrays.stream(LinkType.values()).forEach(linkType ->
@@ -122,7 +120,7 @@ public class JsoupHTMLAnalysisService implements HTMLAnalysis<WebPageAnalysisInf
                         HyperMediaLinkGroup.getLinkGroup(hyperMediaLinkDetail, currentDomain), Collectors.toSet()));
     }
 
-    private Set<HyperMediaLinkDetail> createHyperMediaLinks(LinkType linkType, List<Element> elements) {
+    public Set<HyperMediaLinkDetail> createHyperMediaLinks(LinkType linkType, List<Element> elements) {
         return elements.stream()
                 .filter(element -> !StringUtils.isEmpty(element.absUrl(linkType.getAttribute())))
                 .map(element -> new
@@ -130,7 +128,7 @@ public class JsoupHTMLAnalysisService implements HTMLAnalysis<WebPageAnalysisInf
                 .collect(Collectors.toSet());
     }
 
-    private Boolean isLoginFormExists(Document document) {
+    public Boolean isLoginFormExists(Document document) {
         Map<String, List<Element>> contextMap = new HashMap<>();
         return Arrays.stream(FormValidationRule.values())
                 .noneMatch(formValidationRule -> Boolean.FALSE.equals(formValidationRule.validate(contextMap, document)));

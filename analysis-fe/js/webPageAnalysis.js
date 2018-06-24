@@ -11,11 +11,9 @@ function bindEvents() {
 }
 
 function getAnalysisInfo(element) {
-    const form = element.closest('form[name=analyseForm]')[0];
-    const data = new FormData(form);
-    fireAjax(ANALYSE_WEB_PAGE_URL, data, {
-        "type": "POST",
-        "formData": true,
+    const url = $("#url").val();
+    fireAjax(ANALYSE_WEB_PAGE_URL + "?url=" + url, {}, {
+        "method": "GET",
         "processData": false,
         "contentType": false
     }, function (response) {
