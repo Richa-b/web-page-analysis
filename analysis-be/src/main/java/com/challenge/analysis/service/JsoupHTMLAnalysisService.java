@@ -110,7 +110,7 @@ public class JsoupHTMLAnalysisService implements HTMLAnalysis<WebPageAnalysisInf
     private Map<HyperMediaLinkGroup, Set<HyperMediaLinkDetail>> populateAccessibilityInfoForHyperMediaLinks(Set<HyperMediaLinkDetail> hyperMediaLinkDetails, String currentDomain) {
 
         CompletableFuture[] completableFutures = new CompletableFuture[hyperMediaLinkDetails.size()];
-        int counter = 1;
+        int counter = 0;
         for (HyperMediaLinkDetail hyperMediaLinkDetail : hyperMediaLinkDetails) {
             log.info("Accessing url-" + counter + "::" + hyperMediaLinkDetail.getUrl());
             completableFutures[counter] = webPageAccessibilityCheckerService.accessWebPageLinks(hyperMediaLinkDetail);
