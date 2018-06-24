@@ -18,10 +18,18 @@ function getAnalysisInfo(element) {
         "formData": true,
         "processData": false,
         "contentType": false
-    },function (response) {
-        const source = $("#web-page-detail-template").html();
-        const template = Handlebars.compile(source);
-        const html = template(response.data);
-        $('#web-page-detail').html(html);
+    }, function (response) {
+        if (response.status) {
+            const webPageSource = $("#web-page-detail-template").html();
+            const webPageTemplate = Handlebars.compile(webPageSource);
+            const webPageHtml = webPageTemplate(response.data);
+            $('#web-page-detail').html(webPageHtml);
+            const linkDetailSource = $("#link-details-template").html();
+            const linkDetailTemplate = Handlebars.compile(linkDetailSource);
+            const html = linkDetailTemplate(response.data);
+            $('#link-detail').html(html);
+        } else {
+            $("#web-page-detail").html(response.message);
+        }
     });
 }

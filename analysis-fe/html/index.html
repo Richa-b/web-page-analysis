@@ -33,12 +33,9 @@
         </div>
 
         <div id="web-page-detail"></div>
+        <div id="link-detail"></div>
     </div>
 
-    <div id="webPageInfoTable"></div>
-    <div class="overview-table table-responsive">
-
-    </div>
 
     <script id="web-page-detail-template" type="text/x-handlebars-template">
 
@@ -70,6 +67,34 @@
                 </td>
                 <td> {{containLoginForm}}</td>
             </tr>
+            </tbody>
+        </table>
+    </script>
+    <script id="link-details-template" type="text/x-handlebars-template">
+        <table class="table table-striped table-bordered">
+            <thead>
+            <tr>
+                <th> Link</th>
+                <th> Type</th>
+                <th> Group</th>
+                <th> Reachable</th>
+                <th> Comment</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{#eachInMap linkTypeMap}}
+            {{#each value}}
+            <tr>
+                <td>{{url}}</td>
+                <td>{{linkType}}</td>
+                <td>{{../key}}</td>
+                <td>{{reachable}}</td>
+                <td>{{comments}}</td>
+            </tr>
+
+            {{/each}}
+            {{/eachInMap}}
+
             </tbody>
         </table>
     </script>
