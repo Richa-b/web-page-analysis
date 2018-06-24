@@ -1,0 +1,10 @@
+.content-wrapper {
+    margin-top: 134px;
+    overflow: auto;
+}
+
+.analyse-form-wrapper {
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}

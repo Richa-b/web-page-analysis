@@ -1,0 +1,1 @@
+const ANALYSE_WEB_PAGE_URL = "/analysis";
