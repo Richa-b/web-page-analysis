@@ -39,7 +39,7 @@ public class JsoupHTMLAnalysisService implements HTMLAnalysis<WebPageAnalysisInf
         log.info("-> analyseHTML :: Url=" + currentUrl);
 
         ResponseDTO<WebPageAnalysisInfo> responseDTO = new ResponseDTO<>(messageSource.getMessage("default.successful.message",
-                null, LocaleContextHolder.getLocale()));
+                null, "Web Page Analysed successfully.", LocaleContextHolder.getLocale()));
         try {
             Document document = Jsoup.connect(currentUrl).timeout(ConfigUtil.CONNECTION_TIME_OUT_IN_MILLIS).get();
             responseDTO.setData(getHTMLInfo(document, currentUrl));
