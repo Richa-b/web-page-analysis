@@ -7,6 +7,7 @@
 
 #### How to run
 * Install http-server by typing **npm install -g http-server**
-* Change into the working directory **analyse-fe/html**, where index.html lives
+* Change into the working directory **analyse-fe**, where index.html lives
 * Start the http server by issuing **http-server -c-1**
-* http://localhost:${port Number} (This is generally 8080 but if backend module is running, it would be different)
+* ```http://localhost:8080/html``` (Port Number is generally 8080 in case any other application is using
+that port it will be different. Port Number will be displayed in logs)

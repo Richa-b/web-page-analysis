@@ -24,7 +24,7 @@ OR
 java -jar build/libs/analysis-be-1.0.jar
 ```
 
-* Application will run at 8080 by default. Can be changed in /resources/application.properties. 
+* Application will run at 8090 by default. Can be changed in /resources/application.properties. 
 **In case port is changed, Make sure that is also changed in env.js of frontend module**
 
 #### Unit Test Coverage
@@ -33,4 +33,4 @@ java -jar build/libs/analysis-be-1.0.jar
 * Report will be generated at `${WorkingDirectory}/build/reports/coverage/index.html`
 
 #### Local Test url:
-* http://localhost:8080/api/v1/analyse?url=https://github.com/login
+* http://localhost:8090/api/v1/analyse?url=https://github.com/login
