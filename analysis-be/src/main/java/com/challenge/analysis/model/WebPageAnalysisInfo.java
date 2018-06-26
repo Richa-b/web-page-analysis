@@ -2,7 +2,6 @@ package com.challenge.analysis.model;
 
 import com.challenge.analysis.util.HyperMediaLinkGroup;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
 
 import java.util.Map;
 import java.util.Set;
@@ -97,7 +96,6 @@ public class WebPageAnalysisInfo {
         return new HTMLInfoBuilder();
     }
 
-    @Getter
     public static class HTMLInfoBuilder {
 
         private String url;

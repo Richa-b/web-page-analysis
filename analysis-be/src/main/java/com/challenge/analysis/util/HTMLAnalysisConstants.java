@@ -33,4 +33,7 @@ public class HTMLAnalysisConstants {
 
     public static List<String> headingLevels = Arrays.asList("h1", "h2", "h3", "h4", "h5", "h6");
 
+    public static String ME = "Richa";
+    public static String MY_EMAIL_ID = "richa@tothenew.com";
+
 }
