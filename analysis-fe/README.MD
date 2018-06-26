@@ -1,6 +1,6 @@
 
 ### Introduction
-* This is the frontend module built using Javascript, Jquery and HTML.
+* This is the frontend module built using HandleBar.js, Jquery and HTML.
 
 #### Installation Dependencies
 * Install Node.js (Required to run http-server)
