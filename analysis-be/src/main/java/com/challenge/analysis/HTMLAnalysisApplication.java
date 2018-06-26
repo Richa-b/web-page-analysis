@@ -44,7 +44,7 @@ public class HTMLAnalysisApplication {
 
 
     private ApiInfo generateApiInfo() {
-        return new ApiInfo("Crawler API", "Crawler API to crawl website content.", "1.0",
+        return new ApiInfo("Web Page Analysis API", "API to analyse a web Page", "1.0",
                 "Terms Of Services",
                 new Contact(HTMLAnalysisConstants.ME, "", HTMLAnalysisConstants.MY_EMAIL_ID), "Apache 2.0",
                 "http://www.apache.org/licenses/LICENSE-2.0", Collections.emptyList());
