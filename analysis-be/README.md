@@ -27,6 +27,11 @@ java -jar build/libs/analysis-be-1.0.jar
 * Application will run at 8090 by default. Can be changed in /resources/application.properties. 
 **In case port is changed, Make sure that is also changed in env.js of frontend module**
 
+
+### Swagger
+Swagger plugin has been included which can be used to run API
+Run ```http://localhost:8090/api/v1/``` to access Swagger UI 
+
 #### Unit Test Coverage
 * Jacoco plugin has been used in gradle file.
 * Run `gradle test jacocoTestReport` from the working directory **analyse-be**.
